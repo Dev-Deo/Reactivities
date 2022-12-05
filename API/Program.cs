@@ -21,6 +21,12 @@ builder.Services.AddDbContext<DataContext>(opt =>
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+builder.Services.AddCors(opt=>{
+    opt.AddPolicy("CorsPolicy",policy=>{
+        policy.AllowAnyMethod().AllowAnyHeader().WithOrigins("http://localhost:3000");
+    });
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -43,14 +49,28 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage(); //05122022
     app.UseSwagger();
-    app.UseSwaggerUI();
+
+    ////12052022
+    //app.UseSwaggerUI();
+    app.UseSwaggerUI(c=> c.SwaggerEndpoint("/swagger/v1/swagger.json","API v1"));
 }
 
-app.UseHttpsRedirection();
+////05122022
+//app.UseHttpsRedirection();
+
+app.UseRouting();//05122022
+
+////05122022
+app.UseCors("CorsPolicy");
 
 app.UseAuthorization();
 
-app.MapControllers();
+////05122022
+//app.MapControllers();
+app.UseEndpoints(endpoints =>{
+    endpoints.MapControllers();
+});
 
 await app.RunAsync();
